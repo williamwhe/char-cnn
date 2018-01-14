@@ -12,6 +12,7 @@ Features, Preprocessing and Datasets, as described in:
 
 from keras.preprocessing.sequence import pad_sequences
 from keras.utils import to_categorical
+from functools import reduce
 import numpy as np
 import pandas as pd
 
@@ -30,7 +31,7 @@ def preprocess(xtrain, ytrain, xtest, max_len=None):
 
     xtrain = [line.lower() for line in xtrain]
     xtest = [line.lower() for line in xtest]
-    ytrain = [long(line) for line in ytrain]
+    ytrain = [int(line) for line in ytrain]
 
     def chars(dataset):
         return reduce(
@@ -56,7 +57,8 @@ def preprocess(xtrain, ytrain, xtest, max_len=None):
 
     # determine the maximum text length. in this regime, we are not truncating
     # texts at all. in the paper texts are truncated.
-    max_len = max_len or np.max(map(len, xtrain) + map(len, xtest))
+    max_text_length = np.max([np.max(list(map(len, ls))) for ls in [xtrain, xtest]])
+    max_len = max_len or max_text_length
 
     # distinct letters and classes in the dataaset
     vocab = ['�'] + sorted(list(letters))

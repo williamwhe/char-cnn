@@ -23,5 +23,5 @@ setuptools.setup(
         ]
     ),
     url="https://github.com/purzelrakete/char-cnn",
-    version="0.0.4"
+    version="0.0.5"
 )

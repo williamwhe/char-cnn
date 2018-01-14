@@ -14,6 +14,7 @@ pip install char-cnn
 ## Usage
 
 ```python
+from keras.callbacks import TensorBoard
 from charcnn import cnn, data
 
 xtrain, ytrain, xtest = data.dbpedia(sample=0.05, dataset_source=data.DATA_CLOUD_URL)
@@ -22,6 +23,7 @@ xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(
     ytrain,
     xtest)
 
+callbacks = [TensorBoard(write_images=True)]
 model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, n_classes))
 history = cnn.fit(model, xtrain, ytrain, callbacks)
 

@@ -17,7 +17,7 @@ from keras.layers import Conv1D, MaxPooling1D
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.models import Sequential
 
-import data
+from charcnn import data
 
 
 def char_cnn(n_vocab, max_len, n_classes, weights_path=None):

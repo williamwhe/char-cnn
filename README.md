@@ -37,7 +37,7 @@ print(history.history)
 You can observe progress using Tensorboard by running
 
 ```bash
-tensorboard --logs logs\
+tensorboard --logdir logs\
 ```
 
 ## Citation

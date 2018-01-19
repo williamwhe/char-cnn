@@ -1,4 +1,3 @@
 #!/bin/bash
 
-pytest
-py.test
+pytest && py.test

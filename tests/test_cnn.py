@@ -15,14 +15,15 @@ class TestModel:
         model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
         assert model.built, "model not built"
 
-    def xxx_test_training(self):
+    def test_training(self):
         xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(
             lines('data/test/xtrain.txt'),
             lines('data/test/ytrain.txt'),
-            lines('data/test/xtest.txt'))
+            lines('data/test/xtest.txt'),
+            max_len=130)
 
         model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, n_classes))
-        history = cnn.fit(model, xtrain, ytrain, callbacks)
+        history = cnn.fit(model, xtrain, ytrain)
 
 
 # Testing utilty functions

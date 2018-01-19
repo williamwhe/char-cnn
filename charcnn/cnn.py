@@ -59,7 +59,7 @@ def compiled(model):
     return model
 
 
-def fit(model, xtrain, ytrain, callbacks, batch=128, epochs=5, split=0.1):
+def fit(model, xtrain, ytrain, callbacks=[], batch=128, epochs=5, split=0.1):
     "fit the model"
 
     return model.fit(xtrain,
@@ -102,12 +102,8 @@ def main():
     # compile model
     model = compiled(char_cnn(len(vocab), max_len, n_classes))
 
-    # tensorflow specific, off
-    callbacks = []
-    if True:
-        callbacks.append(TensorBoard(write_images=True))
-
     # fit model and log out to tensorboard
+    callbacks = [TensorBoard(write_images=True)]
     history = fit(model, xtrain, ytrain, callbacks)
     model.save_weights('weights.h5')
 

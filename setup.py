@@ -5,7 +5,8 @@ setuptools.setup(
     author="Rany Keddo",
     extras_require={
         "test": [
-            "pytest"
+            "pytest",
+            "pycodestyle"
         ]
     },
     install_requires=[

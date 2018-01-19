@@ -3,7 +3,9 @@ cache: pip
 dist: trusty
 env:
   - KERAS_BACKEND=tensorflow
-install: pip install --editable .
+install:
+  - pip install --editable .
+  - pip  install pycodestyle
 language: python
 python:
   - "2.7"

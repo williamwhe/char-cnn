@@ -15,7 +15,7 @@ pip install char-cnn
 Determine a sample size first:
 
 ```python
-sample=0.8
+sample=0.1
 ```
 
 Now start learning.
@@ -23,11 +23,21 @@ Now start learning.
 ```python
 from charcnn import cnn, data
 
-sample = 0.05
-xtrain, ytrain, xtest = data.dbpedia(sample=sample, dataset_source=data.DATA_CLOUD_URL)
-xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(xtrain, ytrain, xtest, max_len=1014)
+# configure
+vocab = list(string.printable)
+classes = data.dbedia_classes()
+max_len = 1014
 
-model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, n_classes))
+# load data
+xtrain, ytrain, xtest = data.dbpedia(sample=sample, dataset_source=data.DATA_CLOUD_URL)
+
+# preprocess data
+xtrain = data.encode_features(xtrain, vocab, max_len=max_len)
+ytrain = data.encode_labels(ytrain, classes)
+xtest = data.encode_features(xtest, vocab, max_len=max_len)
+
+# train
+model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, len(classes)))
 estimator = cnn.estimator(model)
 history = cnn.train(estimator, xtrain, ytrain)
 

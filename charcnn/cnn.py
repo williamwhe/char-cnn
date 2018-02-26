@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 """
@@ -136,18 +136,25 @@ def main():
         with open(filename) as f:
             return f.read().splitlines()
 
-    # read and prepare data
-    xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(
-        lines('data/test/xtrain.txt'),
-        lines('data/test/ytrain.txt'),
-        lines('data/test/xtest.txt'))
+    # configure
+    vocab = list(string.printable)
+    classes = data.dbedia_classes()
+    max_len = 1014
 
-    # compile and estimator
-    model = compiled(char_cnn(len(vocab), max_len, n_classes))
+    # read data
+    xtrain = lines('data/test/xtrain.txt')
+    ytrain = lines('data/test/ytrain.txt')
+    xtest = lines('data/test/xtest.txt')
+
+    # preprocess data
+    xtrain = data.encode_features(xtrain, vocab, max_len=max_len)
+    ytrain = data.encode_labels(ytrain, classes)
+    xtest = data.encode_features(xtest, vocab, max_len=max_len)
+
+    # train
+    model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, len(classes)))
     estimator = cnn.estimator(model)
-
-    # fit model and log out to tensorboard
-    history = train(estimator, xtrain, ytrain)
+    history = cnn.train(estimator, xtrain, ytrain)
     model.save_weights('weights.h5')
 
     # write training metrics
@@ -156,12 +163,12 @@ def main():
         f.write(json.dumps(history.history, indent=1))
 
     # prediction
-    _, ytest = predict(model, xtest)
+    _, ytest = cnn.predict(estimator, xtest)
     with open('ytest.txt', 'w') as f:
         f.write('\n'.join(map(str, ytest)))
 
     # test set predictions for inspection
-    _, ytrain_predicted = predict(model, xtrain)
+    _, ytrain_predicted = cnn.predict(estimator, xtrain)
     with open('ytrain.predicted.txt', 'w') as f:
         f.write('\n'.join(map(str, ytrain_predicted)))
 

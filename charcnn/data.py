@@ -1,4 +1,3 @@
-#!/usr/bin/env python2.7
 # -*- coding: utf-8 -*-
 
 """
@@ -10,9 +9,9 @@ Features, Preprocessing and Datasets, as described in:
 
 """
 
-from keras.preprocessing.sequence import pad_sequences
-from keras.utils import to_categorical
 from functools import reduce
+
+import keras as ks
 import numpy as np
 import pandas as pd
 
@@ -24,70 +23,53 @@ DATA_LOCAL_PATH = 'data'
 DATA_CLOUD_URL = 'https://storage.googleapis.com/char-cnn-datsets'
 
 
-def preprocess(xtrain, ytrain, xtest, max_len=None):
+def onehot(features, max_len, vocab_size):
     """
-    Preprocess and featurize the data
+    One-hot encode each letter
     """
 
-    xtrain = [line.lower() for line in xtrain]
-    xtest = [line.lower() for line in xtest]
-    ytrain = [int(line) for line in ytrain]
+    hot = np.zeros((len(features), max_len, vocab_size), dtype=np.bool)
+    i = 0
+    for line in features:
+        j = 0
+        for char in line:
+            if char != 0:
+                hot[i, j, char] = 1.
 
-    def chars(dataset):
-        return reduce(
-            lambda x, y: x.union(y),
-            (set(line) for line in dataset))
+            j += 1
+        i += 1
 
-    def onehot(dataset, max_len, vocab_size):
-        hot = np.zeros((len(dataset), max_len, vocab_size), dtype=np.bool)
-        i = 0
-        for line in dataset:
-            j = 0
-            for char in line:
-                if char != 0:
-                    hot[i, j, char] = 1.
+    return hot
 
-                j += 1
-            i += 1
 
-        return hot
+def encode_features(features, vocab, max_len=1014):
+    """
+    Featurize the text to be classified
+    """
 
-    # get all chars used in train as well as test
-    letters = chars(xtrain).union(chars(xtest))
-
-    # determine the maximum text length. in this regime, we are not truncating
-    # texts at all. in the paper texts are truncated.
-    max_text_length = np.max([np.max(list(map(len, ls))) for ls in [xtrain, xtest]])
-    max_len = max_len or max_text_length
-
-    # distinct letters and classes in the dataaset
-    vocab = ['�'] + sorted(list(letters))
-    classes = sorted(list(set(ytrain)))
-
-    # lookup tables for letters and classes. prepends padding char
+    # lookup table
     idx_letters = dict(((c, i) for c, i in zip(vocab, range(len(vocab)))))
+
+    # encode features
+    features = [[idx_letters[char] for char in list(line)] for line in features]
+
+    # pad features
+    features = ks.preprocessing.sequence.pad_sequences(features, max_len)
+
+    # one hot encode
+    return onehot(features, max_len, len(vocab))
+
+
+def encode_labels(labels, classes):
+
+    # lookup table
     idx_classes = dict(((c, i) for c, i in zip(classes, range(len(classes)))))
 
-    # dense integral indices
-    xtrain = [[idx_letters[char] for char in list(line)] for line in xtrain]
-    xtest = [[idx_letters[char] for char in list(line)] for line in xtest]
-    ytrain = [idx_classes[line] for line in ytrain]
+    # encode labels
+    labels = [idx_classes[line] for line in labels]
 
-    # pad to fixed lengths
-    xtrain = pad_sequences(xtrain, max_len)
-    xtest = pad_sequences(xtest, max_len)
-
-    xtrain = onehot(xtrain, max_len, len(idx_letters))
-    ytrain = to_categorical(ytrain, num_classes=len(classes))
-    xtest = onehot(xtest, max_len, len(idx_letters))
-
-    return (
-        xtrain,
-        ytrain,
-        xtest,
-        vocab,
-        max_len,
-        len(classes))
+    # one hot encode
+    return ks.utils.to_categorical(labels, num_classes=len(classes))
 
 
 def dbpedia(sample=None, dataset_source=DATA_LOCAL_PATH):
@@ -113,3 +95,9 @@ def dbpedia(sample=None, dataset_source=DATA_LOCAL_PATH):
     xtest = df_test['body'].values
 
     return xtrain, ytrain, xtest
+
+
+def dbpedia_classes():
+    "FIXME(rk): 14 classes are numbered through from zero"
+
+    return map(str, range(14))

@@ -1,4 +1,5 @@
 import os
+import string
 
 import numpy as np
 import pandas as pd
@@ -22,18 +23,26 @@ class TestModel:
         assert len(estimator.get_variable_names()) > 0
 
     def test_training_completes(self):
-        xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(
-            lines('data/test/xtrain.txt'),
-            lines('data/test/ytrain.txt'),
-            lines('data/test/xtest.txt'),
-            max_len=130)
+        vocab = list(string.printable)
+        classes = ['hi', 'bye', 'unk']
+        max_len = 5000
 
-        model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, n_classes))
+        # preprocessed data
+        xtrain = lines('data/test/xtrain.txt')
+        xtrain = data.encode_features(xtrain, vocab, max_len=max_len)
+        ytrain = lines('data/test/ytrain.txt')
+        ytrain = data.encode_labels(ytrain, classes)
+        xtest = lines('data/test/xtest.txt')
+        xtest = data.encode_features(xtest, vocab, max_len=max_len)
+
+        # train
+        model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, len(classes)))
         estimator = cnn.estimator(model)
-        history = cnn.train(estimator, xtrain, ytrain)
-        predictions = cnn.predict(estimator, xtest)
+        cnn.train(estimator, xtrain, ytrain)
 
-        # don't expect it to have learned anything meaningful on 5 instances
+        # check results. don't expect it to have learned anything meaningful
+        # on 5 instances.
+        predictions = cnn.predict(estimator, xtest)
         for p in predictions:
             assert p[0] >= 0.0
             assert p[0] <= 1.0

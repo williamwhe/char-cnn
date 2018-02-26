@@ -29,17 +29,16 @@ class TestModel:
             max_len=130)
 
         model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, n_classes))
-        history = cnn.fit(model, xtrain, ytrain)
-        probabilities, classes = cnn.predict(model, xtest)
+        estimator = cnn.estimator(model)
+        history = cnn.train(estimator, xtrain, ytrain)
+        predictions = cnn.predict(estimator, xtest)
 
         # don't expect it to have learned anything meaningful on 5 instances
-        for p in probabilities:
-            assert p >= 0.0
-            assert p <= 1.0
-
-        for c in classes:
-            assert c >= 0
-            assert c <= 1
+        for p in predictions:
+            assert p[0] >= 0.0
+            assert p[0] <= 1.0
+            assert p[1] >= 0
+            assert p[1] <= 1
 
 
 # Testing utilty functions

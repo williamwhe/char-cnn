@@ -22,7 +22,7 @@ def char_cnn(n_vocab, max_len, n_classes, weights_path=None):
     "See Zhang and LeCun, 2015"
 
     model = ks.models.Sequential()
-    model.add(ks.layers.Conv1D(256, 7, activation='relu', input_shape=(max_len, n_vocab)))
+    model.add(ks.layers.Conv1D(256, 7, activation='relu', input_shape=(max_len, n_vocab), name='chars'))
     model.add(ks.layers.MaxPool1D(3))
 
     model.add(ks.layers.Conv1D(256, 7, activation='relu'))
@@ -39,7 +39,7 @@ def char_cnn(n_vocab, max_len, n_classes, weights_path=None):
     model.add(ks.layers.Dropout(0.5))
     model.add(ks.layers.Dense(1024, activation='relu'))
     model.add(ks.layers.Dropout(0.5))
-    model.add(ks.layers.Dense(n_classes, activation='softmax'))
+    model.add(ks.layers.Dense(n_classes, activation='softmax', name='labels'))
 
     if weights_path:
         model.load_weights(weights_path)
@@ -63,23 +63,62 @@ def estimator(model):
     return ks.estimator.model_to_estimator(keras_model=model)
 
 
-def fit(model, xtrain, ytrain, callbacks=[], batch=128, epochs=5, split=0.1):
-    "fit the model"
+def input_function(features,
+                   labels=None,
+                   shuffle=False,
+                   batch_size=128,
+                   num_epochs=5):
+    """
+    returns estimator input function
+    """
 
-    return model.fit(xtrain,
-                     ytrain,
-                     batch_size=batch,
-                     epochs=epochs,
-                     verbose=3,
-                     validation_split=split,
-                     callbacks=callbacks)
+    # estimators expects flaot32
+    features = features.astype(np.float32)
+    if labels is not None:
+        labels = labels.astype(np.float32)
+
+    # return function () -> (features, labels)
+    return tf.estimator.inputs.numpy_input_fn(
+        x={'chars_input': features},
+        y=labels,
+        batch_size=batch_size,
+        shuffle=shuffle,
+        num_epochs=num_epochs)
 
 
-def predict(model, X):
+def train(estimator,
+          xtrain,
+          ytrain,
+          batch_size=128,
+          num_epochs=5):
+    """
+    train the estimator
+    """
+
+    return estimator.train(input_function(xtrain,
+                                          ytrain,
+                                          shuffle=True,
+                                          batch_size=batch_size,
+                                          num_epochs=num_epochs))
+
+
+def evaluate(estimator,
+             xtest,
+             ytest):
+    """
+    evaluate the model
+    """
+
+    return estimator.evaluate(input_function(xtest, labels=ytest))
+
+
+def predict(estimator, X):
     "predict probability, class for each instance"
 
     # predict probability of each class for each instance
-    all_preds = model.predict(X)
+    all_preds = np.array([y['labels']
+                          for y
+                          in estimator.predict(input_function(X))])
 
     # for each instance get the index of the class with max probability
     idxs = np.argmax(all_preds, axis=1)
@@ -103,15 +142,15 @@ def main():
         lines('data/test/ytrain.txt'),
         lines('data/test/xtest.txt'))
 
-    # compile model
+    # compile and estimator
     model = compiled(char_cnn(len(vocab), max_len, n_classes))
+    estimator = cnn.estimator(model)
 
     # fit model and log out to tensorboard
-    callbacks = [TensorBoard(write_images=True)]
-    history = fit(model, xtrain, ytrain, callbacks)
+    history = train(estimator, xtrain, ytrain)
     model.save_weights('weights.h5')
 
-    # evaluation
+    # write training metrics
     print(history.history)
     with open('metrics.txt', 'w') as f:
         f.write(json.dumps(history.history, indent=1))

@@ -1,4 +1,5 @@
 import os
+import string
 
 import numpy as np
 import pandas as pd
@@ -40,6 +41,39 @@ class TestData:
                          [0., 1., 0.],
                          [1., 0., 0.],
                          [0., 0., 1.]])
+
+        assert np.array_equal(got, want)
+
+    def test_generator(self):
+        vocab = list('ABCDbdeghilmnosy ,')
+        classes = ['hi', 'bye', 'unk']
+        max_len = 10
+
+        # read data
+        xtrain = lines('data/test/xtrain.txt')
+        ytrain = lines('data/test/ytrain.txt')
+
+        # generate
+        examples = list(data.examples(xtrain, ytrain, vocab, classes, max_len))
+
+        # check features
+        got = examples[4][0][0].astype(np.float32)
+        want = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
+                         [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0.]])
+
+        assert np.array_equal(got, want)
+
+        # check labels
+        got = examples[4][1].astype(np.float32)
+        want = np.array([[1., 0., 0.]])
 
         assert np.array_equal(got, want)
 

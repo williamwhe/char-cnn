@@ -42,13 +42,20 @@ def onehot(features, max_len, vocab_size):
     return hot
 
 
-def encode_features(features, vocab, max_len=1014):
+def lookup_table(els):
+    "reverse positional index on a list"
+
+    return dict(((c, i) for c, i in zip(els, range(len(els)))))
+
+
+def encode_features(features, vocab, idx_letters=None, max_len=1014):
     """
     Featurize the text to be classified
     """
 
     # lookup table
-    idx_letters = dict(((c, i) for c, i in zip(vocab, range(len(vocab)))))
+    if idx_letters is None:
+        idx_letters = lookup_table(vocab)
 
     # encode features
     features = [[idx_letters[char] for char in list(line)] for line in features]
@@ -60,16 +67,37 @@ def encode_features(features, vocab, max_len=1014):
     return onehot(features, max_len, len(vocab))
 
 
-def encode_labels(labels, classes):
+def encode_labels(labels, classes, idx_classes=None):
+    """
+    One hot encode the classes
+    """
 
     # lookup table
-    idx_classes = dict(((c, i) for c, i in zip(classes, range(len(classes)))))
+    if idx_classes is None:
+        idx_classes = lookup_table(classes)
 
     # encode labels
     labels = [idx_classes[line] for line in labels]
 
     # one hot encode
     return ks.utils.to_categorical(labels, num_classes=len(classes))
+
+
+def examples(features, labels, vocab, classes, max_len):
+    """
+    Generator, given features and labels, emits encoded features and labels.
+    """
+
+    # compute lookup tables once
+    idx_letters = lookup_table(vocab)
+    idx_classes = lookup_table(classes)
+
+    # generate one example at a time
+    examples = zip(features, labels)
+    for i, (features, label) in enumerate(examples):
+        features = encode_features([features], vocab, idx_letters, max_len)
+        label = encode_labels([label], classes, idx_classes)
+        yield features, label
 
 
 def dbpedia(sample=None, dataset_source=DATA_LOCAL_PATH):
@@ -83,8 +111,15 @@ def dbpedia(sample=None, dataset_source=DATA_LOCAL_PATH):
     """
 
     names = ['label', 'title', 'body']
-    df_train = pd.read_csv(dataset_source + '/dbpedia/train.csv.gz', header=None, names=names)
-    df_test = pd.read_csv(dataset_source + '/dbpedia/test.csv.gz', header=None, names=names)
+    df_train = pd.read_csv(
+        dataset_source + '/dbpedia/train.csv.gz',
+        header=None,
+        names=names)
+
+    df_test = pd.read_csv(
+        dataset_source + '/dbpedia/test.csv.gz',
+        header=None,
+        names=names)
 
     if sample:
         df_train = df_train.sample(frac=sample)

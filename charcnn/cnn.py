@@ -12,10 +12,8 @@ An implementation of
 import numpy as np
 import json
 
-from keras.callbacks import TensorBoard
-from keras.layers import Conv1D, MaxPooling1D
-from keras.layers.core import Flatten, Dense, Dropout
-from keras.models import Sequential
+from tensorflow.python import keras as ks
+import tensorflow as tf
 
 from charcnn import data
 
@@ -23,25 +21,25 @@ from charcnn import data
 def char_cnn(n_vocab, max_len, n_classes, weights_path=None):
     "See Zhang and LeCun, 2015"
 
-    model = Sequential()
-    model.add(Conv1D(256, 7, activation='relu', input_shape=(max_len, n_vocab)))
-    model.add(MaxPooling1D(3))
+    model = ks.models.Sequential()
+    model.add(ks.layers.Conv1D(256, 7, activation='relu', input_shape=(max_len, n_vocab)))
+    model.add(ks.layers.MaxPool1D(3))
 
-    model.add(Conv1D(256, 7, activation='relu'))
-    model.add(MaxPooling1D(3))
+    model.add(ks.layers.Conv1D(256, 7, activation='relu'))
+    model.add(ks.layers.MaxPool1D(3))
 
-    model.add(Conv1D(256, 3, activation='relu'))
-    model.add(Conv1D(256, 3, activation='relu'))
-    model.add(Conv1D(256, 3, activation='relu'))
-    model.add(Conv1D(256, 3, activation='relu'))
-    model.add(MaxPooling1D(3))
+    model.add(ks.layers.Conv1D(256, 3, activation='relu'))
+    model.add(ks.layers.Conv1D(256, 3, activation='relu'))
+    model.add(ks.layers.Conv1D(256, 3, activation='relu'))
+    model.add(ks.layers.Conv1D(256, 3, activation='relu'))
+    model.add(ks.layers.MaxPool1D(3))
 
-    model.add(Flatten())
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1024, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(n_classes, activation='softmax'))
+    model.add(ks.layers.Flatten())
+    model.add(ks.layers.Dense(1024, activation='relu'))
+    model.add(ks.layers.Dropout(0.5))
+    model.add(ks.layers.Dense(1024, activation='relu'))
+    model.add(ks.layers.Dropout(0.5))
+    model.add(ks.layers.Dense(n_classes, activation='softmax'))
 
     if weights_path:
         model.load_weights(weights_path)
@@ -57,6 +55,12 @@ def compiled(model):
                   metrics=['accuracy'])
 
     return model
+
+
+def estimator(model):
+    "build tensorflow estimator"
+
+    return ks.estimator.model_to_estimator(keras_model=model)
 
 
 def fit(model, xtrain, ytrain, callbacks=[], batch=128, epochs=5, split=0.1):

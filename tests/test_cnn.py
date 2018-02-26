@@ -15,6 +15,12 @@ class TestModel:
         model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
         assert model.built, "model not built"
 
+    def test_builds_estimator(self):
+        n_vocab, max_len, n_classes = 83, 453, 12
+        model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
+        estimator = cnn.estimator(model)
+        assert len(estimator.get_variable_names()) > 0
+
     def test_training_completes(self):
         xtrain, ytrain, xtest, vocab, max_len, n_classes = data.preprocess(
             lines('data/test/xtrain.txt'),

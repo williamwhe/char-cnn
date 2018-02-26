@@ -9,9 +9,9 @@ setuptools.setup(
         ]
     },
     install_requires=[
-        "keras",
+        "numpy",
         "pandas",
-        "numpy"
+        "tensorflow==1.4.1"
     ],
     license="MIT",
     name="char-cnn",

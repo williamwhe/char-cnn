@@ -25,7 +25,7 @@ from charcnn import cnn, data
 
 # configure
 vocab = list(string.printable)
-classes = data.dbedia_classes()
+classes = data.dbpedia_classes()
 max_len = 1014
 
 # load data

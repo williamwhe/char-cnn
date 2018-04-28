@@ -22,18 +22,24 @@ def char_cnn(n_vocab, max_len, n_classes, weights_path=None):
     "See Zhang and LeCun, 2015"
 
     model = ks.models.Sequential()
-    model.add(ks.layers.Conv1D(256, 7, activation='relu', input_shape=(max_len, n_vocab), name='chars'))
-    model.add(ks.layers.MaxPool1D(3))
+    model.add(ks.layers.InputLayer(input_shape=(max_len, n_vocab), name='chars'))
 
+    # block
     model.add(ks.layers.Conv1D(256, 7, activation='relu'))
     model.add(ks.layers.MaxPool1D(3))
 
+    # block
+    model.add(ks.layers.Conv1D(256, 7, activation='relu'))
+    model.add(ks.layers.MaxPool1D(3))
+
+    # block
     model.add(ks.layers.Conv1D(256, 3, activation='relu'))
     model.add(ks.layers.Conv1D(256, 3, activation='relu'))
     model.add(ks.layers.Conv1D(256, 3, activation='relu'))
     model.add(ks.layers.Conv1D(256, 3, activation='relu'))
     model.add(ks.layers.MaxPool1D(3))
 
+    # fully connected layers
     model.add(ks.layers.Flatten())
     model.add(ks.layers.Dense(1024, activation='relu'))
     model.add(ks.layers.Dropout(0.5))
@@ -57,10 +63,10 @@ def compiled(model):
     return model
 
 
-def estimator(model):
+def estimator(model, model_dir=None):
     "build tensorflow estimator"
 
-    return ks.estimator.model_to_estimator(keras_model=model)
+    return ks.estimator.model_to_estimator(keras_model=model, model_dir=model_dir)
 
 
 def input_function(features,
@@ -79,7 +85,7 @@ def input_function(features,
 
     # return function () -> (features, labels)
     return tf.estimator.inputs.numpy_input_fn(
-        x={'chars_input': features},
+        x={'chars': features},
         y=labels,
         batch_size=batch_size,
         shuffle=shuffle,

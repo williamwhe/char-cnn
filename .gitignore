@@ -1,6 +1,7 @@
 .cache/
 .ipynb_checkpoints/
-logs/
+.pytest_cache/
+build/
 char_cnn.egg-info/
 dist/
-build/
+logs/

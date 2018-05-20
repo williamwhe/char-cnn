@@ -1,8 +1,0 @@
-#!/bin/bash
-#
-# Set up the project.
-
-set -e
-set -u
-
-docker build . -t char-cnn

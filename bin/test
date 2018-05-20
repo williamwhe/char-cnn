@@ -1,6 +1,10 @@
 #!/bin/bash
+#
+# Pass --pdb to break on error.
 
 set -e
 set -u
+
+export TF_CPP_MIN_LOG_LEVEL=2
 
 bin/test-lint && bin/test-unit "$@"

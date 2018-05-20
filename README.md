@@ -1,9 +1,8 @@
 # Char-CNN
 
-[![Build Status](https://travis-ci.org/purzelrakete/char-cnn.png?branch=master)](https://travis-ci.org/purzelrakete/char-cnn)
+[![Build Status](https://travis-ci.org/reflectionlabs/char-cnn.png?branch=master)](https://travis-ci.org/reflectionlabs/char-cnn)
 
-A Keras implementation of [Character-level Convolutional Networks for Text Classification Zhang and LeCun](https://arxiv.org/abs/1509.01626).
-
+A Tensorflow implementation of [Character-level Convolutional Networks for Text Classification Zhang and LeCun](https://arxiv.org/abs/1509.01626).
 
 ## Installation
 
@@ -12,42 +11,32 @@ pip install char-cnn
 ```
 
 ## Usage
-Determine a sample size first:
 
 ```python
-sample=0.1
-```
+import string
 
-Now start learning.
+from charcnn import cnn
+from charcnn import data
 
-```python
-from charcnn import cnn, data
-
-# configure
 vocab = list(string.printable)
-classes = data.dbpedia_classes()
-max_len = 1014
+classes = range(14)
+max_len, batch_size = 1014, 128
 
-# load data
-xtrain, ytrain, xtest = data.dbpedia(sample=sample, dataset_source=data.DATA_CLOUD_URL)
+model = cnn.char_cnn(len(vocab), max_len, len(classes))
+model = cnn.compiled(model)
+model = cnn.estimator(model)
 
-# preprocess data
-xtrain = data.encode_features(xtrain, vocab, max_len=max_len)
-ytrain = data.encode_labels(ytrain, classes)
-xtest = data.encode_features(xtest, vocab, max_len=max_len)
-
-# train
-model = cnn.compiled(cnn.char_cnn(len(vocab), max_len, len(classes)))
-estimator = cnn.estimator(model)
-history = cnn.train(estimator, xtrain, ytrain)
-
-print(history.history)
+model.train(data.input_function(data.DATA_CLOUD_TRAINSET,
+                                vocab,
+                                classes,
+                                batch_size=batch_size,
+                                max_len=max_len))
 ```
 
 You can observe progress using Tensorboard by running
 
 ```bash
-tensorboard --logdir logs\
+tensorboard --logdir logs
 ```
 
 ## Citation

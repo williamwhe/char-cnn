@@ -11,17 +11,17 @@ setuptools.setup(
     install_requires=[
         "numpy",
         "pandas",
-        "tensorflow==1.4.1"
+        "tensorflow==1.8.0"
     ],
     license="MIT",
     name="char-cnn",
-    description="A Keras implementation of Char-CNN: Character-level Convolutional Networks for Text Classification, Zhang et al, 2016",
-    keywords="keras character char cnn nlp deep-learning",
+    description="Tensorflow implementation of Char-CNN: Character-level Convolutional Networks for Text Classification, Zhang et al, 2016",
+    keywords="tensorflow character char cnn nlp deep-learning",
     packages=setuptools.find_packages(
         exclude=[
             "tests"
         ]
     ),
-    url="https://github.com/purzelrakete/char-cnn",
-    version="0.0.6"
+    url="https://github.com/reflectionlabs/char-cnn",
+    version="0.1.0"
 )

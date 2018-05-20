@@ -6,133 +6,100 @@ Features, Preprocessing and Datasets, as described in:
     Character-level Convolutional Networks for Text Classification
     Zhang and LeCun, 2015 (See https://arxiv.org/abs/1509.01626)
 
-
 """
 
-from functools import reduce
+import tensorflow as tf
 
-import keras as ks
-import numpy as np
-import pandas as pd
+# gzipped trainset file on cloud storage
+DATA_CLOUD_TRAINSET = 'gs://char-cnn-datsets/dbpedia/train.csv.gz'
+
+# unknown character integer encoding
+UNK = 1
+
+# non printable charcter. hacks around broken utf-8 string_split, see the
+# comments in `input_function`.
+SPLIT_CHAR = '\a'
+
+# reserve a range from 0. unk: 1, padding: 0.
+N_VOCAB_RESERVED = 2
 
 
-# available when the project is checked out, not when pip installed.
-DATA_LOCAL_PATH = 'data'
-
-# remote path from google cloud storage
-DATA_CLOUD_URL = 'https://storage.googleapis.com/char-cnn-datsets'
-
-
-def onehot(features, max_len, vocab_size):
+def input_function(file_name,
+                   vocab,
+                   classes,
+                   max_len=1014,
+                   shuffle=False,
+                   repeat_count=1,
+                   batch_size=1,
+                   shuffle_buffer_size=1):
     """
-    One-hot encode each letter
-    """
+    Featurized examples.
 
-    hot = np.zeros((len(features), max_len, vocab_size), dtype=np.bool)
-    i = 0
-    for line in features:
-        j = 0
-        for char in line:
-            if char != 0:
-                hot[i, j, char] = 1.
+    The character splitting hack is due to this open tensorflow bug:
 
-            j += 1
-        i += 1
+        https://github.com/tensorflow/tensorflow/pull/12971.
 
-    return hot
-
-
-def lookup_table(els):
-    "reverse positional index on a list"
-
-    return dict(((c, i) for c, i in zip(els, range(len(els)))))
-
-
-def encode_features(features, vocab, idx_letters=None, max_len=1014):
-    """
-    Featurize the text to be classified
+    To work around this, we interleave the string with a non printable
+    character (BEEP). This character must consequently never be present
+    in the source material. This character was chosen because text is highly
+    unlikely to include BEEP characters, and also because it is < 128,
+    which is required to make this hack work.
     """
 
-    # lookup table
-    if idx_letters is None:
-        idx_letters = lookup_table(vocab)
+    # map into [1,n], leaving 0, n_vocab_reserved free
+    vocab_mapped = list(range(N_VOCAB_RESERVED, len(vocab) + N_VOCAB_RESERVED))
 
-    # encode features
-    features = [[idx_letters[char] for char in list(line)] for line in features]
+    # total vocab size
+    n_vocab = len(vocab_mapped) + N_VOCAB_RESERVED
 
-    # pad features
-    features = ks.preprocessing.sequence.pad_sequences(features, max_len)
+    # number of classes
+    n_classes = len(classes)
 
-    # one hot encode
-    return onehot(features, max_len, len(vocab))
+    def fn():
+        d = tf.contrib.lookup.KeyValueTensorInitializer(vocab,
+                                                        vocab_mapped,
+                                                        key_dtype=tf.string,
+                                                        value_dtype=tf.int32)
+        table = tf.contrib.lookup.HashTable(d, UNK)
+
+        ds = (tf.data.TextLineDataset(file_name, compression_type='GZIP')
+              .map(lambda line: tf.decode_csv(line, [[-1], [''], ['']]))
+              .map(lambda y, title, abstract: (title + abstract, y))
+              .map(lambda x, y: (tf.regex_replace(x, '.', '\\0%s' % SPLIT_CHAR), y))
+              .map(lambda x, y: (tf.string_split([x], delimiter=SPLIT_CHAR).values, y))
+              .map(lambda x, y: (x[0:max_len], y))
+              .map(lambda x, y: (table.lookup(x), y))
+              .map(lambda x, y: (x, tf.one_hot(y, n_classes)))
+              .map(lambda x, y: (tf.one_hot(x, n_vocab), y))
+              .map(lambda x, y: ({'chars_input': x}, y))
+              .repeat(repeat_count))
+
+        if shuffle:
+            ds = ds.shuffle(buffer_size=shuffle_buffer_size)
+
+        return ds.padded_batch(batch_size,
+                               padded_shapes=({
+                                   'chars_input': [max_len, n_vocab]}, [n_classes]))
+
+    return fn
 
 
-def encode_labels(labels, classes, idx_classes=None):
+def input_generator(input_fn):
     """
-    One hot encode the classes
-    """
-
-    # lookup table
-    if idx_classes is None:
-        idx_classes = lookup_table(classes)
-
-    # encode labels
-    labels = [idx_classes[line] for line in labels]
-
-    # one hot encode
-    return ks.utils.to_categorical(labels, num_classes=len(classes))
-
-
-def examples(features, labels, vocab, classes, max_len):
-    """
-    Generator, given features and labels, emits encoded features and labels.
-    """
-
-    # compute lookup tables once
-    idx_letters = lookup_table(vocab)
-    idx_classes = lookup_table(classes)
-
-    # generate one example at a time
-    examples = zip(features, labels)
-    for i, (features, label) in enumerate(examples):
-        features = encode_features([features], vocab, idx_letters, max_len)
-        label = encode_labels([label], classes, idx_classes)
-        yield features, label
-
-
-def dbpedia(sample=None, dataset_source=DATA_LOCAL_PATH):
-    """
-    DBpedia is a crowd-sourced community effort to extract structured
-    information from Wikipedia. The DBpedia ontology dataset is constructed by
-    picking 14 nonoverlapping classes from DBpedia 2014. From each of these 14
-    ontology classes, we randomly choose 40,000 training samples and 5,000
-    testing samples. The fields we used for this dataset contain title and
-    abstract of each Wikipedia article.
+    Evaluated tensors.
     """
 
-    names = ['label', 'title', 'body']
-    df_train = pd.read_csv(
-        dataset_source + '/dbpedia/train.csv.gz',
-        header=None,
-        names=names)
+    ds = input_fn()
+    iterator = ds.make_initializable_iterator()
+    init_op = iterator.initializer
+    next_element = iterator.get_next()
 
-    df_test = pd.read_csv(
-        dataset_source + '/dbpedia/test.csv.gz',
-        header=None,
-        names=names)
+    with tf.Session() as sess:
+        sess.run(tf.tables_initializer())
+        sess.run(init_op)
 
-    if sample:
-        df_train = df_train.sample(frac=sample)
-        df_test = df_test.sample(frac=sample)
-
-    xtrain = df_train['body'].values
-    ytrain = df_train['label'].values.astype('int32')
-    xtest = df_test['body'].values
-
-    return xtrain, ytrain, xtest
-
-
-def dbpedia_classes():
-    "FIXME(rk): 14 classes are numbered through from zero"
-
-    return map(str, range(14))
+        while True:
+            try:
+                yield sess.run(next_element)
+            except tf.errors.OutOfRangeError:
+                break

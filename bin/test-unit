@@ -1,3 +1,7 @@
 #!/bin/bash
 
-pytest -s --tb=short --maxfail=1 "$@" && py.test -s --tb=short --maxfail=1 "$@"
+set -e
+set -u
+
+pytest -s --tb=short --maxfail=1 "$@"
+py.test -s --tb=short --maxfail=1 "$@"

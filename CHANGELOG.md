@@ -3,6 +3,10 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [0.1.0] - 2018-05-19
+### Changed
+- converted featurization to tensorflow dataset api
+
 ## [0.0.6] - 2018-01-14
 ### Changed
 - absolute imports, fixes broken import
@@ -34,7 +38,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Initial version to test travis pypi deployment
 
-[Unreleased]: https://github.com/purzelrakete/char-cnn/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/purzelrakete/char-cnn/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/purzelrakete/char-cnn/compare/v0.0.5...v0.1.0
 [0.0.6]: https://github.com/purzelrakete/char-cnn/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/purzelrakete/char-cnn/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/purzelrakete/char-cnn/compare/v0.0.3...v0.0.4

@@ -1,0 +1,17 @@
+[[source]]
+url = "https://pypi.python.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[dev-packages]
+numpy = "==1.13.3"
+pandas = "==0.23.0"
+tensorflow = "==1.8.0"
+
+jupyter = "*"
+pycodestyle = "*"
+pytest = "*"
+
+[packages]
+
+[requires]

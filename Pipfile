@@ -12,6 +12,10 @@ jupyter = "*"
 pycodestyle = "*"
 pytest = "*"
 
+sphinx = "*"
+sphinx-autobuild = "*"
+versioneer = "*"
+
 [packages]
 
 [requires]

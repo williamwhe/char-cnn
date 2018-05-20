@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 
 ## [0.1.2] - 2018-05-19
 ### Changed
-- readthedocs and sphinx documentation
+- readthedocs and sphinx for documentation
 - use versioneer to manage version releases
 
 ## [0.1.1] - 2018-05-19

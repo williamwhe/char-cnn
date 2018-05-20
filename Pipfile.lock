@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a49ffd6cae9b30554b6decbeb8a25d9811752e46809dccd488c46a656e3b3a21"
+            "sha256": "5c22ac27607dcf9aab0e5c8f2fa294ca461a7bc912f88f791599e893e98fb311"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -159,7 +159,6 @@
                 "sha256:9ec02aa7d674acb8618afb127e27fde7fc68994c0437ad759fa094a574adb265",
                 "sha256:ec0a6cb848cc212002b9828c3e34c675e0c9ff6741dc445cab6fdd4e1085d1f1"
             ],
-            "markers": "python_version < '3'",
             "version": "==3.2.0"
         },
         "gast": {
@@ -234,6 +233,7 @@
                 "sha256:8db43a7fb7619037c98626613ff08d03dda9d5d12c84814a4504c78c0da8323c",
                 "sha256:fc0464e68f9c65cd8c453474b4175432cc29ecb6c83775baedf6dbfcee9275ab"
             ],
+            "markers": "python_version < '3.3'",
             "version": "==5.7.0"
         },
         "ipython-genutils": {
@@ -508,7 +508,6 @@
                 "sha256:e64193f0047ad603b71f202332ab5527c5e52aa7c8b609704fc28c0dc20c4365",
                 "sha256:e8c43b5eee76b2083a9badde89fd1bbce6c8942d1045146e100b7b5e014f4f1a"
             ],
-            "markers": "os_name != 'nt'",
             "version": "==0.5.2"
         },
         "py": {
@@ -689,6 +688,14 @@
             "index": "pypi",
             "version": "==0.7.1"
         },
+        "sphinx-rtd-theme": {
+            "hashes": [
+                "sha256:32424dac2779f0840b4788fbccb032ba2496c1ca47a439ad2510c8b1e55dfd33",
+                "sha256:6d0481532b5f441b075127a2d755f430f1f8410a50112b1af6b069518548381d"
+            ],
+            "index": "pypi",
+            "version": "==0.3.1"
+        },
         "sphinxcontrib-websupport": {
             "hashes": [
                 "sha256:7a85961326aa3a400cd4ad3c816d70ed6f7c740acd7ce5d78cd0a67825072eb9",
@@ -807,6 +814,7 @@
                 "sha256:0a2e54558a0628f2145d2fc822137e322412115173e8a2ddbe1c9024338ae83c",
                 "sha256:80044e51ec5bbf6c894ba0bc48d26a8c20a9ba629f4ca19ea26ecfcf87685f5f"
             ],
+            "markers": "python_version < '3'",
             "version": "==0.31.1"
         },
         "widgetsnbextension": {

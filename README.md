@@ -1,6 +1,7 @@
 # Char-CNN
 
 [![Build Status](https://travis-ci.org/reflectionlabs/char-cnn.png?branch=master)](https://travis-ci.org/reflectionlabs/char-cnn)
+[![Documentation Status](https://readthedocs.org/projects/char-cnn/badge/?version=latest)](http://char-cnn.readthedocs.io/en/latest/?badge=latest)
 
 A Tensorflow implementation of [Character-level Convolutional Networks for Text Classification Zhang and LeCun](https://arxiv.org/abs/1509.01626).
 

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-Features, Preprocessing and Datasets, as described in:
+Dataset for the cnn. Input a compressed csv with two columns and no header,
+where the first column is the class and the second column is a piece of text.
 
-    Character-level Convolutional Networks for Text Classification
-    Zhang and LeCun, 2015 (See https://arxiv.org/abs/1509.01626)
+The functions in here will convert the text to a representation the cnn can
+use for learning, using the Tensorflow Dataset API.
 
 """
 

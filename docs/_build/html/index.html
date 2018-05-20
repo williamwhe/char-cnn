@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to char-cnn’s documentation! &mdash; char-cnn 0.1.2 documentation</title>
+  <title>Char Cnn Documentation &mdash; char-cnn 0.1.2 documentation</title>
   
 
   
@@ -79,7 +79,11 @@
             
               <!-- Local TOC -->
               <div class="local-toc"><ul>
-<li><a class="reference internal" href="#">Welcome to char-cnn’s documentation!</a></li>
+<li><a class="reference internal" href="#">Char Cnn Documentation</a><ul>
+<li><a class="reference internal" href="#module-charcnn.data">Dataset</a></li>
+<li><a class="reference internal" href="#module-charcnn.cnn">Model</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
@@ -126,7 +130,7 @@
     
       <li><a href="#">Docs</a> &raquo;</li>
         
-      <li>Welcome to char-cnn’s documentation!</li>
+      <li>Char Cnn Documentation</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -145,9 +149,75 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="welcome-to-char-cnn-s-documentation">
-<h1>Welcome to char-cnn’s documentation!<a class="headerlink" href="#welcome-to-char-cnn-s-documentation" title="Permalink to this headline">¶</a></h1>
-<div class="toctree-wrapper compound">
+  <div class="toctree-wrapper compound">
+</div>
+<div class="section" id="char-cnn-documentation">
+<h1>Char Cnn Documentation<a class="headerlink" href="#char-cnn-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This is a Tensorflow implementation of [Character-level Convolutional Networks
+for Text Classification Zhang and LeCun](<a class="reference external" href="https://arxiv.org/abs/1509.01626">https://arxiv.org/abs/1509.01626</a>).</p>
+<div class="section" id="module-charcnn.data">
+<span id="dataset"></span><h2>Dataset<a class="headerlink" href="#module-charcnn.data" title="Permalink to this headline">¶</a></h2>
+<p>Dataset for the cnn. Input a compressed csv with two columns and no header,
+where the first column is the class and the second column is a piece of text.</p>
+<p>The functions in here will convert the text to a representation the cnn can
+use for learning, using the Tensorflow Dataset API.</p>
+<dl class="function">
+<dt id="charcnn.data.input_function">
+<code class="descclassname">charcnn.data.</code><code class="descname">input_function</code><span class="sig-paren">(</span><em>file_name</em>, <em>vocab</em>, <em>classes</em>, <em>max_len=1014</em>, <em>shuffle=False</em>, <em>repeat_count=1</em>, <em>batch_size=1</em>, <em>shuffle_buffer_size=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/data.html#input_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.data.input_function" title="Permalink to this definition">¶</a></dt>
+<dd><p>Featurized examples.</p>
+<p>The character splitting hack is due to this open tensorflow bug:</p>
+<blockquote>
+<div><a class="reference external" href="https://github.com/tensorflow/tensorflow/pull/12971">https://github.com/tensorflow/tensorflow/pull/12971</a>.</div></blockquote>
+<p>To work around this, we interleave the string with a non printable
+character (BEEP). This character must consequently never be present
+in the source material. This character was chosen because text is highly
+unlikely to include BEEP characters, and also because it is &lt; 128,
+which is required to make this hack work.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="charcnn.data.input_generator">
+<code class="descclassname">charcnn.data.</code><code class="descname">input_generator</code><span class="sig-paren">(</span><em>input_fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/data.html#input_generator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.data.input_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluated tensors.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-charcnn.cnn">
+<span id="model"></span><h2>Model<a class="headerlink" href="#module-charcnn.cnn" title="Permalink to this headline">¶</a></h2>
+<p>An implementation of</p>
+<blockquote>
+<div>Character-level Convolutional Networks for Text Classification
+Zhang and LeCun, 2015 (See <a class="reference external" href="https://arxiv.org/abs/1509.01626">https://arxiv.org/abs/1509.01626</a>)</div></blockquote>
+<dl class="function">
+<dt id="charcnn.cnn.build">
+<code class="descclassname">charcnn.cnn.</code><code class="descname">build</code><span class="sig-paren">(</span><em>vocab</em>, <em>max_len</em>, <em>classes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/cnn.html#build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.cnn.build" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build estimator</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="charcnn.cnn.char_cnn">
+<code class="descclassname">charcnn.cnn.</code><code class="descname">char_cnn</code><span class="sig-paren">(</span><em>n_vocab</em>, <em>max_len</em>, <em>n_classes</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/cnn.html#char_cnn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.cnn.char_cnn" title="Permalink to this definition">¶</a></dt>
+<dd><p>See Zhang and LeCun, 2015.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="charcnn.cnn.compiled">
+<code class="descclassname">charcnn.cnn.</code><code class="descname">compiled</code><span class="sig-paren">(</span><em>model</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/cnn.html#compiled"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.cnn.compiled" title="Permalink to this definition">¶</a></dt>
+<dd><p>compile with chosen config</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="charcnn.cnn.estimator">
+<code class="descclassname">charcnn.cnn.</code><code class="descname">estimator</code><span class="sig-paren">(</span><em>model</em>, <em>model_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/cnn.html#estimator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.cnn.estimator" title="Permalink to this definition">¶</a></dt>
+<dd><p>build tensorflow estimator</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="charcnn.cnn.predict">
+<code class="descclassname">charcnn.cnn.</code><code class="descname">predict</code><span class="sig-paren">(</span><em>estimator</em>, <em>input_fn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/charcnn/cnn.html#predict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#charcnn.cnn.predict" title="Permalink to this definition">¶</a></dt>
+<dd><p>predict probability, class for each instance</p>
+</dd></dl>
+
 </div>
 </div>
 <div class="section" id="indices-and-tables">

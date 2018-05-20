@@ -3,14 +3,27 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to char-cnn's documentation!
-====================================
-
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+Char Cnn Documentation
+======================
 
+This is a Tensorflow implementation of [Character-level Convolutional Networks
+for Text Classification Zhang and LeCun](https://arxiv.org/abs/1509.01626).
+
+Dataset
+*******
+
+.. automodule:: charcnn.data
+   :members:
+
+Model
+*****
+
+.. automodule:: charcnn.cnn
+   :members:
 
 Indices and tables
 ==================

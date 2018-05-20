@@ -19,7 +19,7 @@ from charcnn import data
 
 def build(vocab, max_len, classes):
     """
-    Build estimator
+    Build estimator.
     """
 
     ret = char_cnn(len(vocab), max_len, len(classes))

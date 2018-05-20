@@ -10,8 +10,8 @@
 Char Cnn Documentation
 ======================
 
-This is a Tensorflow implementation of [Character-level Convolutional Networks
-for Text Classification Zhang and LeCun](https://arxiv.org/abs/1509.01626).
+This is a Tensorflow implementation of `Character-level Convolutional Networks
+for Text Classification Zhang and LeCun <https://arxiv.org/abs/1509.01626/>`_
 
 Dataset
 *******

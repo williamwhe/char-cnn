@@ -22,15 +22,12 @@ vocab = list(string.printable)
 classes = range(14)
 max_len, batch_size = 1014, 128
 
-model = cnn.char_cnn(len(vocab), max_len, len(classes))
-model = cnn.compiled(model)
-model = cnn.estimator(model)
-
-model.train(data.input_function(data.DATA_CLOUD_TRAINSET,
-                                vocab,
-                                classes,
-                                batch_size=batch_size,
-                                max_len=max_len))
+estimator = cnn.build(vocab, max_len, classes)
+estimator.train(data.input_function(data.DATA_CLOUD_TRAINSET,
+                                    vocab,
+                                    classes,
+                                    batch_size=batch_size,
+                                    max_len=max_len))
 ```
 
 You can observe progress using Tensorboard by running

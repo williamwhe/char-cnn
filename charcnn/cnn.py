@@ -17,6 +17,18 @@ import tensorflow as tf
 from charcnn import data
 
 
+def build(vocab, max_len, classes):
+    """
+    Build estimator
+    """
+
+    ret = char_cnn(len(vocab), max_len, len(classes))
+    ret = compiled(ret)
+    ret = estimator(ret)
+
+    return ret
+
+
 def char_cnn(n_vocab, max_len, n_classes):
     """
     See Zhang and LeCun, 2015.

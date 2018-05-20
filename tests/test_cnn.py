@@ -22,12 +22,20 @@ class TestModel:
     def test_constructs_and_compiles_char_cnn(self):
         n_vocab, max_len, n_classes = 83, 453, 12
         model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
-        assert model.built, "model not built"
+        assert model._is_compiled, "model not compiled"
 
-    def test_builds_estimator(self):
+    def test_estimator(self):
         n_vocab, max_len, n_classes = 83, 453, 12
         model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
         estimator = cnn.estimator(model)
+        assert len(estimator.get_variable_names()) > 0
+
+    def test_build(self):
+        vocab = list('ABCDbdeghilmnosy ,')
+        classes = range(3)
+        max_len = 300
+
+        estimator = cnn.build(vocab, max_len, classes)
         assert len(estimator.get_variable_names()) > 0
 
     def test_training_completes(self):

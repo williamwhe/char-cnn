@@ -37,6 +37,34 @@ You can observe progress using Tensorboard by running
 tensorboard --logdir logs
 ```
 
+### Running on Google Cloud ML Engine
+
+You will need to check out the project, install pipenv and `pipenv install
+--dev`. After installing the google cloud toolchain and authenticating your
+account you can run the following.
+
+To test locally:
+
+```bash
+bin/train development \
+  --train-files data/test/train.csv.gz \
+  --test-files data/test/train.csv.gz \
+  --vocab-file https://storage.googleapis.com/reflectionlabs/dbpedia/chars.csv \
+  --classes-file https://storage.googleapis.com/reflectionlabs/dbpedia/classes.csv
+```
+
+For a full GPU cloud run on dbpedia:
+
+```bash
+bin/train production \
+  --project char-cnn \
+  --bucket reflectionlabs \
+  --train-files gs://reflectionlabs/dbpedia/train.csv.gz \
+  --test-files gs://reflectionlabs/dbpedia/test.csv.gz \
+  --vocab-file https://storage.googleapis.com/reflectionlabs/dbpedia/chars.csv \
+  --classes-file https://storage.googleapis.com/reflectionlabs/dbpedia/classes.csv
+```
+
 ## Citation
 
 ```citation

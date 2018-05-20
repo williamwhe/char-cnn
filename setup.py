@@ -10,7 +10,6 @@ setuptools.setup(
     },
     install_requires=[
         "numpy",
-        "pandas",
         "tensorflow==1.8.0"
     ],
     license="MIT",

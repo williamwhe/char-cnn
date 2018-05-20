@@ -9,10 +9,13 @@ use for learning, using the Tensorflow Dataset API.
 
 """
 
+import io
+
+import six
 import tensorflow as tf
 
 # gzipped trainset file on cloud storage
-DATA_CLOUD_TRAINSET = 'gs://char-cnn-datsets/dbpedia/train.csv.gz'
+DATA_CLOUD_TRAINSET = 'gs://reflectionlabs/dbpedia/train.csv.gz'
 
 # unknown character integer encoding
 UNK = 1
@@ -79,8 +82,7 @@ def input_function(file_name,
             ds = ds.shuffle(buffer_size=shuffle_buffer_size)
 
         return ds.padded_batch(batch_size,
-                               padded_shapes=({
-                                   'chars_input': [max_len, n_vocab]}, [n_classes]))
+                               padded_shapes=({'chars_input': [max_len, n_vocab]}, [n_classes]))
 
     return fn
 

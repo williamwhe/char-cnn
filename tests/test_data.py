@@ -2,6 +2,7 @@
 
 import os
 import string
+import tempfile
 
 import numpy as np
 import six

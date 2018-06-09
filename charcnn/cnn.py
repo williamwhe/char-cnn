@@ -17,14 +17,14 @@ import tensorflow as tf
 from charcnn import data
 
 
-def build(vocab, max_len, classes):
+def build(vocab, max_len, classes, job_dir=None):
     """
     Build estimator.
     """
 
     ret = char_cnn(len(vocab), max_len, len(classes))
     ret = compiled(ret)
-    ret = estimator(ret)
+    ret = estimator(ret, model_dir=job_dir)
 
     return ret
 

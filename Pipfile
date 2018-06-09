@@ -5,14 +5,15 @@ name = "pypi"
 
 [packages]
 numpy = "==1.13.3"
-pandas = "==0.23.0"
+six = "==1.11.0"
 tensorflow = "==1.8.0"
 
 [dev-packages]
+fire = "==0.1.3"
 jupyter = "*"
+pandas = "==0.23.0"
 pycodestyle = "*"
 pytest = "*"
-
 sphinx = "*"
 sphinx-autobuild = "*"
 sphinx_rtd_theme = "*"

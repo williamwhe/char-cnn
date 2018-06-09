@@ -4,7 +4,6 @@ import os
 import string
 
 import numpy as np
-import pandas as pd
 import tensorflow as tf
 
 from charcnn import cnn
@@ -42,11 +41,9 @@ class TestModel:
         vocab = list('ABCDbdeghilmnosy ,')
         classes = range(3)
         max_len = 300
-        n_classes, n_vocab = len(classes), len(vocab)
 
         # train
-        model = cnn.compiled(cnn.char_cnn(n_vocab, max_len, n_classes))
-        estimator = cnn.estimator(model)
+        estimator = cnn.build(vocab, max_len, classes)
         estimator.train(data.input_function(TRAIN_CSV,
                                             vocab,
                                             classes,

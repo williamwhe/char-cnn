@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-Control training on google cloud ml from the command line.
+Control google cloud ml from the command line.
 
 """
 
@@ -94,6 +94,43 @@ def development(train_files,
     subprocess.call(cmd)
 
 
+def prediction(project,
+               bucket,
+               model_name,
+               input_paths,
+               batch_size,
+               verbose=True):
+    """
+    Run prediction.
+    """
+
+    def model_dir(model_base_dir):
+        stdout = subprocess.check_output(['gsutil', 'ls', model_base_dir])
+        cleaned = stdout.strip().split('\n')
+        return cleaned[-1]
+
+    job_name = 'p%s' % int(round(time.time()))
+    model_base_dir = 'gs://%s/train/%s/model' % (bucket, model_name)
+    output_path = 'gs://%s/predict/%s' % (bucket, job_name)
+    model_dir = model_dir(model_base_dir)
+
+    cmd = ['gcloud', 'ml-engine', 'jobs', 'submit', 'prediction', job_name,
+           '--model-dir', model_dir,
+           '--input-paths', input_paths,
+           '--output-path', output_path,
+           '--project', project,
+           '--region', DEFAULT_REGION,
+           '--runtime-version', TF_RUNTIME_VERSION,
+           '--data-format', 'text',
+           '--batch-size', str(batch_size)
+           ]
+
+    if verbose:
+        print(' '.join(cmd))
+
+    subprocess.call(cmd)
+
+
 def tensorboard(job_name,
                 bucket=DEFAULT_BUCKET,
                 verbose=True):
@@ -115,5 +152,6 @@ if __name__ == '__main__':
     fire.Fire({
         'development': development,
         'production': production,
+        'prediction': prediction,
         'tensorboard': tensorboard
     })

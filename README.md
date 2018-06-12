@@ -24,11 +24,11 @@ classes = range(14)
 max_len, batch_size = 1014, 128
 
 estimator = cnn.build(vocab, max_len, classes)
-estimator.train(data.input_function(data.DATA_CLOUD_TRAINSET,
-                                    vocab,
-                                    classes,
-                                    batch_size=batch_size,
-                                    max_len=max_len))
+estimator.train(data.input_fn(data.DATA_CLOUD_TRAINSET,
+                              vocab,
+                              classes,
+                              batch_size=batch_size,
+                              max_len=max_len))
 ```
 
 You can observe progress using Tensorboard by running
@@ -46,9 +46,9 @@ account you can run the following.
 To test locally:
 
 ```bash
-bin/train development \
+bin/mlengine development \
   --train-files data/test/train.csv.gz \
-  --test-files data/test/train.csv.gz \
+  --test-files data/test/test.csv.gz \
   --vocab-file https://storage.googleapis.com/reflectionlabs/dbpedia/chars.csv \
   --classes-file https://storage.googleapis.com/reflectionlabs/dbpedia/classes.csv
 ```
@@ -56,13 +56,24 @@ bin/train development \
 For a full GPU cloud run on dbpedia:
 
 ```bash
-bin/train production \
+bin/mlengine production \
   --project char-cnn \
   --bucket reflectionlabs \
   --train-files gs://reflectionlabs/dbpedia/train.csv.gz \
   --test-files gs://reflectionlabs/dbpedia/test.csv.gz \
   --vocab-file https://storage.googleapis.com/reflectionlabs/dbpedia/chars.csv \
   --classes-file https://storage.googleapis.com/reflectionlabs/dbpedia/classes.csv
+```
+
+Prediction:
+
+```bash
+bin/mlengine prediction \
+  --project char-cnn \
+  --bucket reflectionlabs \
+  --model-name t1528827688 \
+  --batch-size 64 \
+  --input-paths gs://reflectionlabs/dbpedia/test.csv.gz
 ```
 
 ## Citation

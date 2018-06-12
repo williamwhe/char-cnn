@@ -44,19 +44,19 @@ class TestModel:
 
         # train
         estimator = cnn.build(vocab, max_len, classes)
-        estimator.train(data.input_function(TRAIN_CSV,
-                                            vocab,
-                                            classes,
-                                            batch_size=8,
-                                            max_len=max_len))
+        estimator.train(data.input_fn(TRAIN_CSV,
+                                      vocab,
+                                      classes,
+                                      batch_size=8,
+                                      max_len=max_len))
 
         # check results. don't expect it to have learned anything meaningful
         # on 5 instances.
-        predictions = cnn.predict(estimator, data.input_function(TRAIN_CSV,
-                                                                 vocab,
-                                                                 classes,
-                                                                 batch_size=8,
-                                                                 max_len=max_len))
+        predictions = cnn.predict(estimator, data.input_fn(TRAIN_CSV,
+                                                           vocab,
+                                                           classes,
+                                                           batch_size=8,
+                                                           max_len=max_len))
         for p in predictions:
             assert p[0] >= 0.0
             assert p[0] <= 1.0

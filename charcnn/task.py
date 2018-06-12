@@ -21,28 +21,33 @@ def train_and_evaluate(train_files,
                        epochs,
                        train_batch_size,
                        test_batch_size,
-                       job_dir):
+                       job_base_dir,
+                       max_steps=1):
     """
     Run the training and evaluation using estimators, then save the model.
     """
 
+    # checkpoints and the saved model are stored separately
+    saved_model_dir = job_base_dir + '/model'
+    job_dir = job_base_dir + '/job'
+
     # set up the training data
-    train_input = data.input_function(train_files,
-                                      vocab,
-                                      classes,
-                                      max_len=max_len,
-                                      shuffle=True,
-                                      batch_size=train_batch_size,
-                                      repeat_count=epochs)
+    train_input = data.input_fn(train_files,
+                                vocab,
+                                classes,
+                                max_len=max_len,
+                                shuffle=True,
+                                batch_size=train_batch_size,
+                                repeat_count=epochs)
 
     # set up the test data
-    test_input = data.input_function(train_files,
-                                     vocab,
-                                     classes,
-                                     max_len=max_len,
-                                     shuffle=False,
-                                     batch_size=test_batch_size,
-                                     repeat_count=epochs)
+    test_input = data.input_fn(train_files,
+                               vocab,
+                               classes,
+                               max_len=max_len,
+                               shuffle=False,
+                               batch_size=test_batch_size,
+                               repeat_count=epochs)
 
     # construct the estimator
     estimator = cnn.build(vocab,
@@ -52,8 +57,13 @@ def train_and_evaluate(train_files,
 
     # train and test the estimator
     tf.estimator.train_and_evaluate(estimator,
-                                    tf.estimator.TrainSpec(train_input),
+                                    tf.estimator.TrainSpec(train_input, max_steps=max_steps),
                                     tf.estimator.EvalSpec(test_input))
+
+    # save the model
+    estimator.export_savedmodel(saved_model_dir,
+                                data.serving_input_receiver_fn(vocab, test_batch_size),
+                                strip_default_attrs=True)
 
 
 def parse_args():
@@ -88,7 +98,7 @@ def parse_args():
         '--max-len',
         help='Maximum document length',
         type=int,
-        default=1014
+        default=data.DEFAULT_MAX_LEN
     )
     parser.add_argument(
         '--epochs',

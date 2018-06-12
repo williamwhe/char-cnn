@@ -13,14 +13,76 @@ from charcnn import data
 TRAIN_CSV = 'data/test/train.csv.gz'
 
 
+class TestServingData:
+    """
+    Test tensorflow serving functions
+    """
+
+    def test_serving_input_receiver_fn_returns_spec(self):
+        serving_input_receiver = data.serving_input_receiver_fn(['a'], 64)()
+        assert serving_input_receiver
+
+
 class TestInputFunction:
 
-    def test_input_function_features(self):
-        input_fn = data.input_function(TRAIN_CSV,
-                                       list('ABCDbdeghilmnosy ,'),
-                                       range(3),
-                                       batch_size=1,
-                                       max_len=10)
+    def test_input_fn_resulting_dimension(self):
+        vocab, classes, max_len = ['a'], range(1), 10
+        input_fn = data.input_fn(TRAIN_CSV,
+                                 vocab,
+                                 classes,
+                                 batch_size=1,
+                                 max_len=max_len)
+
+        ds = input_fn()
+        iterator = ds.make_initializable_iterator()
+        init_op = iterator.initializer
+        next_element = iterator.get_next()
+
+        with tf.Session() as sess:
+            sess.run(tf.tables_initializer())
+            sess.run(init_op)
+            sess.run(next_element)
+
+            shape = next_element[0]['chars_input'].shape
+
+            # batch dimension
+            assert shape[0].value is None
+
+            # length dimension
+            assert shape[1].value is max_len
+
+            # this is UNK and PAD. needs to be added to the vocab size.
+            n_vocab_reserved = 2
+
+            # vocab dimension
+            assert shape[2].value is len(vocab) + n_vocab_reserved
+
+    def test_input_fn_labels(self):
+        input_fn = data.input_fn(TRAIN_CSV,
+                                 list('ABCDbdeghilmnosy ,'),
+                                 range(3),
+                                 batch_size=6,
+                                 max_len=10)
+
+        batches = list(data.input_generator(input_fn))
+        assert len(batches) == 1
+
+        got = batches[0][1].astype(np.float32)
+        want = np.array([[1., 0., 0.],
+                         [1., 0., 0.],
+                         [0., 1., 0.],
+                         [0., 1., 0.],
+                         [1., 0., 0.],
+                         [0., 0., 1.]])
+
+        assert np.array_equal(got, want)
+
+    def test_input_fn_features(self):
+        input_fn = data.input_fn(TRAIN_CSV,
+                                 list('ABCDbdeghilmnosy ,'),
+                                 range(3),
+                                 batch_size=1,
+                                 max_len=10)
 
         batches = list(data.input_generator(input_fn))
         assert len(batches) == 6
@@ -40,62 +102,12 @@ class TestInputFunction:
 
         assert np.array_equal(got, want)
 
-    def test_input_function_labels(self):
-        input_fn = data.input_function(TRAIN_CSV,
-                                       list('ABCDbdeghilmnosy ,'),
-                                       range(3),
-                                       batch_size=6,
-                                       max_len=10)
-
-        batches = list(data.input_generator(input_fn))
-        assert len(batches) == 1
-
-        got = batches[0][1].astype(np.float32)
-        want = np.array([[1., 0., 0.],
-                         [1., 0., 0.],
-                         [0., 1., 0.],
-                         [0., 1., 0.],
-                         [1., 0., 0.],
-                         [0., 0., 1.]])
-
-        assert np.array_equal(got, want)
-
-    def test_input_function_resulting_dimension(self):
-        vocab, classes = ['a'], range(1)
-        input_fn = data.input_function(TRAIN_CSV,
-                                       vocab,
-                                       classes,
-                                       batch_size=10,
-                                       max_len=10)
-
-        ds = input_fn()
-        iterator = ds.make_initializable_iterator()
-        init_op = iterator.initializer
-        next_element = iterator.get_next()
-
-        with tf.Session() as sess:
-            sess.run(tf.tables_initializer())
-            sess.run(init_op)
-            shape = next_element[0]['chars_input'].shape
-
-            # batch dimension
-            assert shape[0].value is None
-
-            # length dimension
-            assert shape[1].value is 10
-
-            # this is UNK and PAD. needs to be added to the vocab size.
-            n_vocab_reserved = 2
-
-            # vocab dimension
-            assert shape[2].value is len(vocab) + n_vocab_reserved
-
     def test_utf8_strings(self):
-        input_fn = data.input_function(TRAIN_CSV,
-                                       [six.text_type(u'ä')],
-                                       range(3),
-                                       batch_size=1,
-                                       max_len=10)
+        input_fn = data.input_fn(TRAIN_CSV,
+                                 [six.text_type(u'ä')],
+                                 range(3),
+                                 batch_size=1,
+                                 max_len=10)
 
         batches = list(data.input_generator(input_fn))
         assert len(batches) == 6
@@ -120,11 +132,11 @@ class TestInputFunction:
         assert np.array_equal(got, want)
 
     def test_strings_longer_than_max_len(self):
-        input_fn = data.input_function(TRAIN_CSV,
-                                       list('ABCDbdeghilmnosy ,'),
-                                       range(3),
-                                       batch_size=1,
-                                       max_len=1)
+        input_fn = data.input_fn(TRAIN_CSV,
+                                 list('ABCDbdeghilmnosy ,'),
+                                 range(3),
+                                 batch_size=1,
+                                 max_len=1)
 
         batches = list(data.input_generator(input_fn))
         assert len(batches) == 6

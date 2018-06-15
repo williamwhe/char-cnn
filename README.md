@@ -14,21 +14,59 @@ pip install char-cnn
 ## Usage
 
 ```python
-import string
-
 from charcnn import cnn
 from charcnn import data
+import pandas as pd
+import tensorflow as tf
 
-vocab = list(string.printable)
-classes = range(14)
-max_len, batch_size = 1014, 128
+df_vocab = pd.read_csv(data.VOCAB_FILE, header=None, names=['char'])
+df_classes = pd.read_csv(data.CLASSES_FILE, header=None, names=['idx', 'name'])
 
-estimator = cnn.build(vocab, max_len, classes)
-estimator.train(data.input_fn(data.DATA_CLOUD_TRAINSET,
-                              vocab,
-                              classes,
-                              batch_size=batch_size,
-                              max_len=max_len))
+vocab = list(df_vocab.char)
+classes = list(df_classes.idx)
+class_names = list(df_classes.name)
+params = {'classes': classes, 'vocab': vocab}
+
+max_len, batch_size, epochs = 1014, 128, 5
+save_checkpoints_steps=100
+job_dir = '/tmp/char-cnn-job'
+
+train_input = data.input_fn(data.CLOUD_TRAINSET,
+                            vocab,
+                            classes,
+                            max_len=max_len,
+                            shuffle=True,
+                            batch_size=batch_size,
+                            repeat_count=epochs)
+
+test_input = data.input_fn(data.CLOUD_TESTSET,
+                           vocab,
+                           classes,
+                           max_len=max_len,
+                           shuffle=False,
+                           batch_size=batch_size,
+                           repeat_count=epochs)
+
+# configure estimator run
+run_config = tf.estimator.RunConfig(
+    save_checkpoints_steps=save_checkpoints_steps,
+    model_dir=job_dir
+)
+
+# construct the estimator
+estimator = tf.estimator.Estimator(model_fn=cnn.model_fn,
+                                   params=params,
+                                   config=run_config)
+
+# train and test the estimator
+tf.estimator.train_and_evaluate(estimator,
+                                tf.estimator.TrainSpec(train_input, max_steps=max_steps),
+                                tf.estimator.EvalSpec(test_input))
+
+# save the model
+estimator.export_savedmodel(saved_model_dir,
+                            data.serving_input_receiver_fn(vocab, test_batch_size),
+                            strip_default_attrs=True)
 ```
 
 You can observe progress using Tensorboard by running

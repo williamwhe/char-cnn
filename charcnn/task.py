@@ -22,10 +22,15 @@ def train_and_evaluate(train_files,
                        train_batch_size,
                        test_batch_size,
                        job_base_dir,
-                       max_steps=1):
+                       max_steps=None,
+                       save_checkpoints_steps=100,
+                       tf_random_seed=None):
     """
     Run the training and evaluation using estimators, then save the model.
     """
+
+    # config
+    params = {'classes': classes, 'vocab': vocab}
 
     # checkpoints and the saved model are stored separately
     saved_model_dir = job_base_dir + '/model'
@@ -49,11 +54,17 @@ def train_and_evaluate(train_files,
                                batch_size=test_batch_size,
                                repeat_count=epochs)
 
+    # configure estimator run
+    run_config = tf.estimator.RunConfig(
+        save_checkpoints_steps=save_checkpoints_steps,
+        tf_random_seed=tf_random_seed,
+        model_dir=job_dir
+    )
+
     # construct the estimator
-    estimator = cnn.build(vocab,
-                          max_len,
-                          classes,
-                          job_dir=job_dir)
+    estimator = tf.estimator.Estimator(model_fn=cnn.model_fn,
+                                       params=params,
+                                       config=run_config)
 
     # train and test the estimator
     tf.estimator.train_and_evaluate(estimator,

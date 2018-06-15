@@ -12,7 +12,16 @@ use for learning, using the Tensorflow Dataset API.
 import tensorflow as tf
 
 # gzipped trainset file on cloud storage
-DATA_CLOUD_TRAINSET = 'gs://reflectionlabs/dbpedia/train.csv.gz'
+CLOUD_TRAINSET = 'gs://reflectionlabs/dbpedia/train.csv.gz'
+
+# gzipped trainset file on cloud storage
+CLOUD_TESTSET = 'gs://reflectionlabs/dbpedia/test.csv.gz'
+
+# dbpedia vocab
+VOCAB_FILE = 'https://storage.googleapis.com/reflectionlabs/dbpedia/chars.csv'
+
+# dbpedia classes
+CLASSES_FILE = 'https://storage.googleapis.com/reflectionlabs/dbpedia/classes.csv'
 
 # padding char integer encoding
 PADDING = 0
@@ -162,7 +171,7 @@ def input_fn(file_name,
         return (ds
                 .map(lambda x, y: (pad_features(x, n_vocab, max_len), y))
                 .map(lambda x, y: (x, pad_labels(y, n_classes)))
-                .map(lambda x, y: ({'chars_input': x}, y)))
+                .map(lambda x, y: ({'chars': x}, y)))
 
     return fn
 
@@ -188,14 +197,14 @@ def serving_input_receiver_fn(vocab,
         }
 
         # apply the same transforms we used in the input_fn
-        chars_input = encode_features(examples, table, n_vocab, max_len)
+        chars = encode_features(examples, table, n_vocab, max_len)
 
         # pad out features
-        chars_input = pad_features(chars_input, n_vocab, max_len)
+        chars = pad_features(chars, n_vocab, max_len)
 
         # transformed for model usage
         features = {
-            'chars_input': chars_input
+            'chars': chars
         }
 
         return tf.estimator.export.ServingInputReceiver(features,

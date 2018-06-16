@@ -26,7 +26,7 @@ class TestServingData:
 class TestInputFunction:
 
     def test_input_fn_resulting_dimension(self):
-        vocab, classes, max_len = ['a'], range(1), 10
+        vocab, classes, max_len = ['a'], list(range(1)), 10
         input_fn = data.input_fn(TRAIN_CSV,
                                  vocab,
                                  classes,
@@ -43,7 +43,7 @@ class TestInputFunction:
             sess.run(init_op)
             sess.run(next_element)
 
-            shape = next_element[0]['chars_input'].shape
+            shape = next_element[0]['chars'].shape
 
             # batch dimension
             assert shape[0].value is None
@@ -60,7 +60,7 @@ class TestInputFunction:
     def test_input_fn_labels(self):
         input_fn = data.input_fn(TRAIN_CSV,
                                  list('ABCDbdeghilmnosy ,'),
-                                 range(3),
+                                 list(range(3)),
                                  batch_size=6,
                                  max_len=10)
 
@@ -80,7 +80,7 @@ class TestInputFunction:
     def test_input_fn_features(self):
         input_fn = data.input_fn(TRAIN_CSV,
                                  list('ABCDbdeghilmnosy ,'),
-                                 range(3),
+                                 list(range(3)),
                                  batch_size=1,
                                  max_len=10)
 
@@ -88,7 +88,7 @@ class TestInputFunction:
         assert len(batches) == 6
 
         # unpack one more layer because this is a batch of examples, len 1
-        got = batches[4][0]['chars_input'][0]
+        got = batches[4][0]['chars'][0]
         want = np.array([[0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                          [0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
                          [0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 1., 0., 0., 0., 0., 0., 0., 0.],
@@ -105,7 +105,7 @@ class TestInputFunction:
     def test_utf8_strings(self):
         input_fn = data.input_fn(TRAIN_CSV,
                                  [six.text_type(u'ä')],
-                                 range(3),
+                                 list(range(3)),
                                  batch_size=1,
                                  max_len=10)
 
@@ -113,7 +113,7 @@ class TestInputFunction:
         assert len(batches) == 6
 
         # "hi"," ginnä"
-        got = batches[0][0]['chars_input'][0]
+        got = batches[0][0]['chars'][0]
 
         # "hi"," ginnä". but with only 'ä' in the vocabulary, we have
         # [pad, unk, 'ä'] vocab. so everything unknown until the last letter,
@@ -134,7 +134,7 @@ class TestInputFunction:
     def test_strings_longer_than_max_len(self):
         input_fn = data.input_fn(TRAIN_CSV,
                                  list('ABCDbdeghilmnosy ,'),
-                                 range(3),
+                                 list(range(3)),
                                  batch_size=1,
                                  max_len=1)
 
@@ -142,7 +142,7 @@ class TestInputFunction:
         assert len(batches) == 6
 
         # "simon"," hi"
-        got = batches[1][0]['chars_input'][0]
+        got = batches[1][0]['chars'][0]
 
         # "simon", " hi", but with max_len 1. vocab length including unk and
         # padding is 20. offset of s is 14 + unk + pad = 16 (starting at 0).

@@ -89,16 +89,6 @@ def char_cnn(features, n_vocab, n_classes, with_dropout=True):
     return logits
 
 
-def estimator(run_config, hparams):
-    """
-    Returns an Estimator.
-    """
-
-    return tf.estimator.Estimator(model_fn=model_fn,
-                                  params=hparams,
-                                  config=run_config)
-
-
 def model_fn(features, labels, mode, params):
     """
     Estimator model function for prediction, training and evaluation.

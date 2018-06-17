@@ -22,5 +22,5 @@ setuptools.setup(
         ]
     ),
     url="https://github.com/reflectionlabs/char-cnn",
-    version="0.1.2"
+    version="0.2.0"
 )

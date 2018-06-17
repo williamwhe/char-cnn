@@ -109,7 +109,7 @@ Prediction:
 bin/mlengine prediction \
   --project char-cnn \
   --bucket reflectionlabs \
-  --model-name t1528827688 \
+  --model-name t1529179141 \
   --batch-size 64 \
   --input-paths gs://reflectionlabs/dbpedia/test.csv.gz
 ```
